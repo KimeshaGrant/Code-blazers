@@ -1,40 +1,73 @@
-# INFO3180 VueJS and Flask Starter
+# Welcome to your Lovable project
 
-This template should help get you started developing with Vue 3 on the frontend and Flask as an API on the backend.
+## Project info
 
-## Recommended IDE Setup
+**URL**: https://lovable.dev/projects/e71b77c4-bd75-40fb-b947-9eb12d380a78
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.vscode-typescript-vue-plugin).
+## How can I edit this code?
 
-## Customize configuration
+There are several ways of editing your application.
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+**Use Lovable**
 
-## Project Setup
+Simply visit the [Lovable Project](https://lovable.dev/projects/e71b77c4-bd75-40fb-b947-9eb12d380a78) and start prompting.
+
+Changes made via Lovable will be committed automatically to this repo.
+
+**Use your preferred IDE**
+
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
 
 ```sh
-npm install
-```
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-### Compile and Hot-Reload for Development
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-```sh
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-### Compile and Minify for Production
+**Edit a file directly in GitHub**
 
-```sh
-npm run build
-```
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## Start Flask API
+**Use GitHub Codespaces**
 
-Remember to always create a virtual environment and install the packages in your requirements file
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-```bash
-$ python -m venv venv (you may need to use python3 instead)
-$ source venv/bin/activate (or .\venv\Scripts\activate on Windows)
-$ pip install -r requirements.txt
-$ flask --app app --debug run
-```
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/e71b77c4-bd75-40fb-b947-9eb12d380a78) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
