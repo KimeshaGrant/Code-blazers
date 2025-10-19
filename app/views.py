@@ -5,26 +5,30 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from app import app
+from app import app, db
 from flask import render_template, request, jsonify, send_file
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from app.models import User
 import os
 
 
 ###
-# Routing for your application.
+# Routing for application.
 ###
 
 @app.route('/')
 def index():
     return jsonify(message="This is the beginning of our API")
 
+bot = TherapyBot()
 
-###
-# The functions below should be applicable to all Flask apps.
-###
+@app.route('/chat', methods=['POST'])
+def chat():
+    message = request.json.get('message')
+    response = bot.get_response(message)
+    return jsonify({'response': response})
 
 # Here we define a function to collect form errors from Flask-WTF
-# which we can later use
 def form_errors(form):
     error_messages = []
     """Collects form errors"""
@@ -61,3 +65,20 @@ def add_header(response):
 def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.json
+    user = User.query.filter_by(username=data['username'], password=data['password']).first()
+    if user:
+        token = create_access_token(identity=user.id, expires_delta=timedelta(days=1))
+        return jsonify(token=token, user_id=user.id)
+    return jsonify(message="Invalid credentials"), 401
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.json
+    user = User(username=data['username'], password=data['password'], name=data['name'], email=data['email'])
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(message="User registered successfully"), 201
