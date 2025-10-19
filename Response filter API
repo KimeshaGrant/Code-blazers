@@ -1,0 +1,109 @@
+--- API CALLER ---
+
+from openai import OpenAI
+import os
+
+# Initialize client (Ensure OPENAI_API_KEY is set in environment or loaded)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def check_comment_risk(comment_text):
+    """
+    Sends comment to OpenAI Moderation API and returns an action command.
+    """
+    try:
+        response = client.moderations.create(input=comment_text)
+        mod_results = response.results[0]
+        is_flagged = mod_results.flagged
+        categories = mod_results.categories
+
+    except Exception as e:
+        # In case of API failure, block by default to ensure safety
+        print(f"API Error: {e}. Defaulting to block.")
+        return "BLOCK_AND_WARN_USER"
+
+    # --- Aggressive Filtering Logic ---
+    if not is_flagged:
+        # No flag was raised at all - it is safe.
+        return "ALLOW_POST"
+    
+    else:
+        # If ANYTHING is flagged, it's high risk. Check for highest-priority block type.
+        
+        # 1. HIGHEST PRIORITY: Self-Harm/Suicide
+        if categories.self_harm:
+            return "BLOCK_AND_RESOURCE"
+
+        # 2. SECONDARY PRIORITY: Explicit Bullying, Hate, or Violence
+        elif categories.harassment or categories.violence or categories.hate:
+            return "BLOCK_AND_WARN_USER"
+
+        else:
+            # All other flags (e.g., Profanity, minor toxicity) are also hard blocks.
+            return "BLOCK_AND_WARN_USER"
+
+
+--- INTEGRATION ---
+
+from flask import Flask, request, jsonify
+
+# Assume your database functions are imported here
+# from . import database_module 
+
+app = Flask(__name__)
+
+# Mock function for logging high-risk incidents (you should implement this securely)
+def log_incident(user_id, comment, reason):
+    """Logs the details of a blocked comment for administrator review."""
+    print(f"INCIDENT LOGGED: User {user_id} | Reason: {reason} | Comment: '{comment}'")
+    # database_module.save_incident(user_id, comment, reason)
+
+
+@app.route('/submit-comment', methods=['POST'])
+def submit_comment():
+    """Handles the user's comment submission."""
+    
+    # 1. Get data from the form
+    data = request.json
+    user_id = data.get('user_id') 
+    raw_comment = data.get('comment_text')
+    
+    if not raw_comment:
+        return jsonify({"message": "Comment cannot be empty."}), 400
+
+    # 2. Run the Aggressive Moderation Check
+    action = check_comment_risk(raw_comment)
+
+    # 3. Take Action based on the result
+    if action == "BLOCK_AND_RESOURCE":
+        # Block and display Crisis Resources
+        log_incident(user_id, raw_comment, "Self-Harm Detected")
+        
+        # DO NOT save to public database
+        return jsonify({
+            "success": False,
+            "message": "We've detected high-risk content. Your well-being is important. Please use these crisis resources immediately: [LINK TO CRISIS HOTLINE]."
+        }), 403 # Forbidden
+
+    elif action == "BLOCK_AND_WARN_USER":
+        # Block and Warn (for bullying/explicit content)
+        log_incident(user_id, raw_comment, "Policy Violation")
+        
+        # DO NOT save to public database
+        return jsonify({
+            "success": False,
+            "message": "Your comment violated our safety guidelines and was not posted."
+        }), 403
+
+    else: # action == "ALLOW_POST"
+        # Safe content: Save to database
+        # database_module.save_new_comment(user_id, raw_comment, status="LIVE") 
+        print(f"Comment posted successfully by user {user_id}: {raw_comment}")
+        
+        return jsonify({
+            "success": True,
+            "message": "Comment posted successfully."
+        }), 200
+
+if __name__ == '__main__':
+    # This is for testing only. Use a production WSGI server for live deployment.
+    app.run(debug=True)
